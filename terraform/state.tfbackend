@@ -1,0 +1,5 @@
+resource_group_name  = "storage-rg"
+storage_account_name = "storage_name"
+container_name       = "container_name"
+key                  = "YOUR_PROJECT_NAME" ##Get value from Gitlab runner
+sas_token            = "sp=racwdl....." ##Your SAS token with privileges

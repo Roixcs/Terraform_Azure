@@ -1,0 +1,69 @@
+image: hashicorp/terraform:1.9.7
+
+variables:
+  TF_WORKING_DIR: "terraform"  #es la subcarpeta del repo donde está toda la infraestructura
+  TF_ENVIRONMENT: "environments/dev.tfvars"
+  TF_STATE_FILE: "${CI_PROJECT_NAME}_dev.tfstate"
+  TF_PLAN_FILE: "tfplan-${CI_PIPELINE_ID}_${CI_PROJECT_NAME}.tfplan"
+
+before_script:
+  - cd $TF_WORKING_DIR
+  - pwd
+  # Reemplazar el nombre del proyecto en el backend.hcl
+  - sed -i "s|YOUR_PROJECT_NAME|$TF_STATE_FILE|g" state.tfbackend
+  - cat state.tfbackend
+  - echo "Inicializando Terraform..."
+  - terraform init -backend-config="state.tfbackend"
+  - terraform state list
+
+stages:
+  - validate
+  - plan
+  - apply
+  - destroy
+
+validate:
+  stage: validate
+  script:
+    - terraform validate
+  rules:
+    - changes:
+        - $TF_ENVIRONMENT
+        - "**/*.tf"
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+
+plan:
+  stage: plan
+  script:
+    - apk add --no-cache jq  # Si usas Alpine
+    - terraform plan -var-file="${TF_ENVIRONMENT}" -out=$TF_PLAN_FILE
+    - terraform show -json $TF_PLAN_FILE > plan.json
+    - jq '.resource_changes[] | select(.change.actions | contains(["create"]))' plan.json > creates.json
+    - if [ -s creates.json ]; then echo "Nuevos recursos detectados. Procediendo..."; else echo "No hay nuevos recursos. Deteniendo pipeline."; exit 1; fi
+  artifacts:
+    paths:
+      - $TF_WORKING_DIR/$TF_PLAN_FILE  # Save tfplan as artifact
+    expire_in: 1h
+  rules:
+    - changes:
+        - dev.tfvars
+        - "**/*.tf"
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+
+apply:
+  stage: apply
+  script:
+    - terraform apply -auto-approve $TF_PLAN_FILE
+  when: manual  # Para evitar que se creen los recursos automaticamente
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+  dependencies:
+    - plan  # Asegura que el plan esté disponible en este job
+
+destroy:
+  stage: destroy
+  when: manual  # Destruir solo manualmente
+  script:
+    - terraform destroy -auto-approve -var-file="${TF_ENVIRONMENT}"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
