@@ -18,7 +18,16 @@ variable "resource_group_name" {
   type        = string
 }
 
-variable "tenant_id" {
-  description = "ID del tenant de Azure."
-  type        = string
+# variable "tenant_id" {
+#   description = "ID del tenant de Azure."
+#   type        = string
+# }
+
+variable "secrets" {
+  description = "Lista de secretos a crear en Key Vault"
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
 }

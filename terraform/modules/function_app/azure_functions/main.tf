@@ -11,7 +11,10 @@ resource "azurerm_service_plan" "service_plan" {
 resource "azurerm_service_plan" "consumption_plan" {
   for_each = { for func in var.functions : func.name => func if func.plan_type == "consumption" && func.create }
 
-  name                = "ASP-${replace(substr(each.value.name, 0, 24), "-", "")}-${random_string.plan_suffix_serverless[each.key].result}"
+  //name                = "ASP-${replace(substr(each.value.name, 0, 24), "-", "")}-${random_string.plan_suffix_serverless[each.key].result}"
+  name                = coalesce(each.value.plan_name,
+                    "ASP-${replace(substr(each.value.name, 0, 24), "-", "")}-${random_string.plan_suffix_serverless[each.key].result}"
+                  )
   location            = var.location
   resource_group_name = var.resource_group_name
   sku_name            = "Y1"
@@ -29,7 +32,7 @@ resource "azurerm_windows_function_app" "function_app" {
   service_plan_id = each.value.plan_type == "basic" ? azurerm_service_plan.service_plan[each.key].id : azurerm_service_plan.consumption_plan[each.key].id
 
   site_config {
-    always_on = each.value.plan_type == "b1"
+    always_on = each.value.plan_type == "basic"
     application_stack {
       dotnet_version = "v7.0"
       use_dotnet_isolated_runtime = true
@@ -66,6 +69,9 @@ resource "azurerm_storage_account" "storage_account" {
   for_each = { for func in var.functions : func.name => func if func.create }
 
   name                     = "${replace(replace(substr(each.value.name, 0, 20), "-", ""), "fn", "")}${random_string.storage_account_suffix[each.key].result}"
+  # name                     = coalesce(each.value.storage_name,
+  #     "${replace(replace(substr(each.value.name, 0, 20), "-", ""), "fn", "")}${random_string.storage_account_suffix[each.key].result}"
+  #   )
   resource_group_name      = var.resource_group_name
   location                 = var.location
   account_tier             = "Standard"
@@ -123,7 +129,7 @@ resource "azurerm_monitor_smart_detector_alert_rule" "failure_anomalies" {
   description = "Failure Anomalies notifies you of an unusual rise in the rate of failed HTTP requests or dependency calls."
 
   action_group {
-    ids = [] # Agregar IDs de grupos de acción si aplica
+    ids = try(var.action_group_ids, [])
   }
   lifecycle {
     prevent_destroy = false # Permite que Terraform destruya este recurso al eliminarlo.

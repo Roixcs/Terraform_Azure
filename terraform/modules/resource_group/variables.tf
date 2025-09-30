@@ -11,6 +11,10 @@ variable "resource_group_name" {
 variable "location" {
   type        = string
   description = "Ubicación del Resource Group"
+  validation {
+    condition     = contains(["eastus", "eastus2", "westus"], var.location)
+    error_message = "Location debe ser alguna de: eastus, eastus2, westus."
+  }
 }
 
 variable "create_resource_group" {

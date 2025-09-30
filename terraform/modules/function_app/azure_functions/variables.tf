@@ -1,18 +1,43 @@
+# variable "functions" {
+#   description = "Lista de funciones a crear con sus configuraciones"
+#   type = list(object({
+#     name                       = string
+#     plan_type                  = string  # "consumption" o "basic"
+#     create                     = bool    # Activa/desactiva la creación
+#     app_settings = list(object({
+#         name        = string
+#         value       = string
+#         slotSetting = optional(bool, false)
+#     }))
+#     plan_name                  = optional(string) # Nombre opcional del App Service Plan
+#   }))
+#   default = []
+# }
+
 variable "functions" {
   description = "Lista de funciones a crear con sus configuraciones"
   type = list(object({
-    name                       = string
-    plan_type                  = string  # "consumption" o "basic"
-    create                     = bool    # Activa/desactiva la creación
+    name              = string
+    plan_type         = string  # "consumption" o "basic"
+    create            = bool
+    plan_name         = optional(string)
+    storage_name      = optional(string)
+    app_insights_name = optional(string)
     app_settings = list(object({
-        name        = string
-        value       = string
-        slotSetting = optional(bool, false)
+      name        = string
+      value       = string
+      slotSetting = optional(bool, false)
     }))
-    plan_name                  = optional(string) # Nombre opcional del App Service Plan
   }))
   default = []
 }
+
+variable "action_group_ids" {
+  description = "IDs de grupos de acción para alertas en Application Insights"
+  type        = list(string)
+  default     = []
+}
+
 
 variable "location" {
   type        = string
