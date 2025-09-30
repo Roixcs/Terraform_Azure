@@ -56,11 +56,12 @@ resource "azurerm_monitor_smart_detector_alert_rule" "failure_anomalies" {
 
 
 resource "azapi_resource" "serverFarm" {
-  for_each             = { for func in var.functions : func.name => func if func.create }
+  for_each  = { for func in var.functions : func.name => func if func.create }
   type                      = "Microsoft.Web/serverfarms@2023-12-01"
   schema_validation_enabled = false
   location                  = var.location
-  name                      = each.value.name
+  //name                      = each.value.name
+  name                      = coalesce(each.value.plan_name, "asp-${each.value.name}")
   parent_id                 = var.resource_group_id
   body = {
     kind = "functionapp",
@@ -102,28 +103,49 @@ resource "azapi_resource" "functionApps" {
           maximumInstanceCount = 40,
           instanceMemoryMB     = 2048,
         },
+        # runtime = {
+        #   name    = "dotnet-isolated",
+        #   version = "8.0",
+        # }
         runtime = {
-          name    = "dotnet-isolated",
-          version = "8.0",
+          name    = try(each.value.runtime_name, "dotnet-isolated")
+          version = try(each.value.runtime_version, "8.0")
         }
       },
       siteConfig = {
-        appSettings = [
-          {
-            name  = "AzureWebJobsStorage__accountName",
-            value = azurerm_storage_account.storage_account[each.key].name
-          },
-          {
-            name  = "APPLICATIONINSIGHTS_CONNECTION_STRING",
-            value = azurerm_application_insights.app_insights[each.key].connection_string
-          }
-        ]
+        appSettings = concat(
+          [
+            {
+              name  = "AzureWebJobsStorage__accountName"
+              value = azurerm_storage_account.storage_account[each.key].name
+            },
+            {
+              name  = "APPLICATIONINSIGHTS_CONNECTION_STRING"
+              value = azurerm_application_insights.app_insights[each.key].connection_string
+            },
+            {
+              name  = "AzureWebJobsStorage"
+              value = azurerm_storage_account.storage_account[each.key].primary_connection_string
+            }
+          ],
+          each.value.app_settings
+        )
+        # appSettings = [
+        #   {
+        #     name  = "AzureWebJobsStorage__accountName",
+        #     value = azurerm_storage_account.storage_account[each.key].name
+        #   },
+        #   {
+        #     name  = "APPLICATIONINSIGHTS_CONNECTION_STRING",
+        #     value = azurerm_application_insights.app_insights[each.key].connection_string
+        #   }
+        # ]
       }
     }
   }
-  depends_on = [
-  azapi_resource.serverFarm,
-  azurerm_application_insights.app_insights,
-  azurerm_storage_account.storage_account
-]
+    depends_on = [
+      azapi_resource.serverFarm,
+      azurerm_application_insights.app_insights,
+      azurerm_storage_account.storage_account
+    ]
 }

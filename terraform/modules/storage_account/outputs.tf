@@ -1,6 +1,15 @@
-output "primary_web_endpoint" {
-  value = length(azurerm_storage_account.static_site) > 0 ? azurerm_storage_account.static_site[0].primary_web_host : null
+# output "primary_web_endpoint" {
+#   value = length(azurerm_storage_account.static_site) > 0 ? azurerm_storage_account.static_site[0].primary_web_host : null
+# }
+
+
+output "storage_web_endpoints" {
+  value = {
+    for k, sa in azurerm_storage_account.this :
+    k => try(sa.primary_web_endpoint, null)
+  }
 }
+
 
 
 # output "static_site_url" {

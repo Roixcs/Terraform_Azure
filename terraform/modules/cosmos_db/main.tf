@@ -23,42 +23,24 @@ resource "azurerm_cosmosdb_account" "cosmosdb" {
   tags = var.tags
 }
 
-# Cosmos DB Database
-resource "azurerm_cosmosdb_sql_database" "database" {
-  count               = var.create_cosmos_db ? 1 : 0
-  name                = var.database_name #"${var.database_name}-${random_string.database_suffix.result}"
+resource "azurerm_cosmosdb_sql_database" "this" {
+  for_each = { for db in var.databases : db.name => db }
+  name                = each.value.name
   resource_group_name = var.resource_group_name
-  account_name        = length(azurerm_cosmosdb_account.cosmosdb) > 0 ? azurerm_cosmosdb_account.cosmosdb[0].name : null
-  #account_name        =  var.create_cosmos_db ? azurerm_cosmosdb_account.cosmosdb[0].name : var.database_name
-  #account_name        = azurerm_cosmosdb_account.cosmosdb.name
+  account_name        = azurerm_cosmosdb_account.cosmosdb[0].name
 }
 
-# Container 1
-resource "azurerm_cosmosdb_sql_container" "container_1" {
-  count               = var.create_cosmos_db ? 1 : 0
-  name                = var.container_1_name
+resource "azurerm_cosmosdb_sql_container" "this" {
+  for_each = {
+    for db in var.databases : db.name => db.containers...
+  }
+  name                = each.value.name
+  partition_key_paths = [each.value.partition_key_path]
   resource_group_name = var.resource_group_name
-  account_name        = length(azurerm_cosmosdb_account.cosmosdb) > 0 ? azurerm_cosmosdb_account.cosmosdb[0].name : null
-  #account_name        =  var.create_cosmos_db ? azurerm_cosmosdb_account.cosmosdb[0].name : var.database_name
-  database_name       = length(azurerm_cosmosdb_sql_database.database) > 0 ? azurerm_cosmosdb_sql_database.database[0].name : var.database_name
-
-  partition_key_paths = var.container_1_partition_key # Aquí el nombre correcto es partition_key_paths
-  #partition_key_version = 2
+  account_name        = azurerm_cosmosdb_account.cosmosdb[0].name
+  database_name       = azurerm_cosmosdb_sql_database.this[each.value.db_name].name
+  throughput          = each.value.throughput
 }
-
-# Container 2
-resource "azurerm_cosmosdb_sql_container" "container_2" {
-  count               = var.create_cosmos_db ? 1 : 0
-  name                = var.container_2_name
-  resource_group_name = var.resource_group_name
-  account_name        = length(azurerm_cosmosdb_account.cosmosdb) > 0 ? azurerm_cosmosdb_account.cosmosdb[0].name : null
-  #account_name        =  var.create_cosmos_db ? azurerm_cosmosdb_account.cosmosdb[0].name : var.database_name
-  database_name       = length(azurerm_cosmosdb_sql_database.database) > 0 ? azurerm_cosmosdb_sql_database.database[0].name : var.database_name
-
-  partition_key_paths = var.container_2_partition_key # Asegurando el formato correcto como arreglo
-  #partition_key_version = 2
-}
-
 resource "random_string" "cosmosdb_suffix" {
   length  = 5
   special = false
