@@ -3,6 +3,13 @@ variable "create_key_vault" {
   type        = bool
   default     = false
 }
+
+variable "create_secrets" {
+  description = "Indica si se crean los secretos en el Key Vault"
+  type        = bool
+  default     = false
+}
+
 variable "key_vault_name" {
   description = "Nombre del Key Vault."
   type        = string
@@ -30,4 +37,11 @@ variable "secrets" {
     value = string
   }))
   default = []
+}
+
+
+variable "allow_destroy" {
+  description = "Permite destruir recursos. Debe estar en true solo para terraform destroy."
+  type        = bool
+  default     = false
 }

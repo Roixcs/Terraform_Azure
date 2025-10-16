@@ -27,3 +27,9 @@ variable "subscription_id" {
   description = "ID de la suscripción de Azure"
   type        = string
 }
+
+variable "allow_destroy" {
+  description = "Permite destruir recursos. Debe estar en true solo para terraform destroy."
+  type        = bool
+  default     = false
+}

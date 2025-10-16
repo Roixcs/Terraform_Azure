@@ -108,7 +108,7 @@ variable "secrets" {
 # -------------------------
 # API Management
 # -------------------------
-variable "create_api_management_name" {
+variable "create_api_management" {
   type    = bool
   default = false
 }
@@ -186,6 +186,7 @@ variable "functions" {
   type    = list(any)
   default = []
 }
+
 variable "action_group_ids" {
   type    = list(string)
   default = []
@@ -234,6 +235,12 @@ variable "client_secret" {
 }
 
 
+
+variable "allow_destroy" {
+  description = "Permite destruir recursos. Debe estar en true solo para terraform destroy."
+  type        = bool
+  default     = false
+}
 
 
 # variable "environment" {

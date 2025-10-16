@@ -42,6 +42,7 @@ output "location" {
 #   value = coalesce(module.resource_group.location, var.location)
 # }
 
+
 # -------------------------
 # Storage Accounts
 # -------------------------
@@ -78,8 +79,8 @@ module "service_bus" {
   resource_group_name        = local.rg_name
   location                   = local.rg_loc
   sku                        = var.service_bus_sku
-  queues                     = var.service_bus_queues
-  topics                     = var.service_bus_topics
+  service_bus_queues         = var.service_bus_queues
+  service_bus_topics         = var.service_bus_topics
 }
 
 # -------------------------
@@ -99,7 +100,7 @@ module "key_vault" {
 # -------------------------
 module "api_management" {
   source              = "./modules/api_management"
-  //create_api_management = var.create_api_management_name
+  create_api_management = var.create_api_management
   api_management_name = var.api_management_name
   resource_group_name = local.rg_name
   location            = local.rg_loc
@@ -131,7 +132,7 @@ module "cosmos_db" {
   //cosmos_account_name = var.cosmos_account_name
   resource_group_name = local.rg_name
   location            = local.rg_loc
-  databases           = var.cosmos_databases
+  cosmos_databases    = var.cosmos_databases
 }
 
 
@@ -142,8 +143,16 @@ module "vnet" {
   address_space       = var.address_space
   subnets             = var.subnets
   resource_group_name  = local.rg_name
-  //depends_on          = [module.resource_group]
   location             = local.rg_loc
+  tags                = var.tags
+}
+
+module "log_analytics_workspace" {
+  source              = "./modules/log_analytics_workspace"
+  subscription_id     = var.subscription_id
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  reuse_existing_workspace = true
   tags                = var.tags
 }
 
@@ -156,6 +165,9 @@ module "azure_functions" {
   resource_group_name = local.rg_name
   location            = local.rg_loc
   action_group_ids    = var.action_group_ids
+  subscription_id     = var.subscription_id
+  workspace_id        = module.log_analytics_workspace.workspace_id
+  depends_on          = [module.log_analytics_workspace]
 }
 
 # -------------------------
@@ -167,4 +179,7 @@ module "azure_functions_linux" {
   resource_group_name = local.rg_name
   resource_group_id   = module.resource_group.resource_group_id
   location            = local.rg_loc
+  subscription_id     = var.subscription_id
+  workspace_id        = module.log_analytics_workspace.workspace_id
+  depends_on          = [module.log_analytics_workspace]
 }

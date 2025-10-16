@@ -19,20 +19,25 @@ variable "location" {
   type        = string
 }
 
-variable "databases" {
-  description = "Lista de bases y contenedores para Cosmos"
+variable "cosmos_databases" {
+  description = "Lista de bases de datos Cosmos y sus contenedores"
   type = list(object({
     name       = string
-    throughput = optional(number) # opcional en el DB
+    throughput = optional(number) # shared throughput
     containers = list(object({
       name               = string
       partition_key_path = string
-      throughput         = optional(number)
+      throughput         = optional(number) # dedicated throughput
     }))
   }))
 }
 
 
+variable "allow_destroy" {
+  description = "Permite destruir recursos. Debe estar en true solo para terraform destroy."
+  type        = bool
+  default     = false
+}
 
 
 

@@ -5,7 +5,7 @@ resource "azurerm_signalr_service" "signalr" {
   resource_group_name = var.resource_group_name
   location            = var.location
   sku {
-    name     = "Free_F1"
+    name     = "Standard_S1" # "Standard_S1" "Free_F1"
     capacity = 1
   }
 #   features {

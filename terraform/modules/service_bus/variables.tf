@@ -35,8 +35,8 @@ variable "sku" {
   default     = "Standard"
 }
 
-variable "queues" {
-  description = "Lista de colas a crear"
+variable "service_bus_queues" {
+  description = "Lista de colas a crear en el Service Bus"
   type = list(object({
     name                               = string
     max_size_in_megabytes              = optional(number, 1024)
@@ -50,7 +50,7 @@ variable "queues" {
   default = []
 }
 
-variable "topics" {
+variable "service_bus_topics" {
   description = "Lista de tópicos a crear (solo Standard/Premium)"
   type = list(object({
     name                               = string
@@ -67,4 +67,10 @@ variable "topics" {
     }))
   }))
   default = []
+}
+
+variable "allow_destroy" {
+  description = "Permite destruir recursos. Debe estar en true solo para terraform destroy."
+  type        = bool
+  default     = false
 }

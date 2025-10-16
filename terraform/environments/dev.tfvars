@@ -23,7 +23,7 @@ client_secret = "client_secret_value" #from your App Registration Secret on Azur
 # -------------------------
 # Resource Group
 # -------------------------
-resource_group_name  = "tf-resource-group-test-v1-dev-rg"
+resource_group_name  = "rg-test-tf-uat"
 
 
 # -------------------------
@@ -31,7 +31,7 @@ resource_group_name  = "tf-resource-group-test-v1-dev-rg"
 # -------------------------
 functions = [
   {
-    name            = "fn-ms-test-tf-v1-dev" #For example
+    name            = "fn-ms-tf-serverless-uat" #For example
     plan_type       = "consumption"
     create          = false #flag
     app_settings = [
@@ -46,9 +46,10 @@ functions = [
         slotSetting = false
       }
     ]
+    plan_name   = null
   },
   {
-    name            = "fn-ms-test-tf-asp-v2-dev" 
+    name            = "fn-ms..." 
     plan_type       = "basic" # App Service plan, Tier basic
     create          = false
     app_settings = [
@@ -75,9 +76,42 @@ action_group_ids = [] # puedes poner un grupo de acción real si quieres alertas
 # -------------------------
 functions_linux = [
   {
-    name       = "fn-linux-consumption-tftest-dev"
+    name       = "fn-test-tf-notification-uat"
     plan_type  = "FlexConsumption"
     create     = true
+    runtime_name = "dotnet-isolated"
+    runtime_version = "8.0"
+    app_settings = [
+      { name = "SettingA", value = "ValueA", slotSetting = false },
+      { name = "SettingB", value = "ValueB", slotSetting = false }
+    ]
+  },
+  {
+    name       = "fn-test-tf-datalogging-uat"
+    plan_type  = "FlexConsumption"
+    create     = false
+    runtime_name = "dotnet-isolated"
+    runtime_version = "8.0"
+    app_settings = [
+      { name = "SettingA", value = "ValueA", slotSetting = false },
+      { name = "SettingB", value = "ValueB", slotSetting = false }
+    ]
+  },
+  {
+    name       = "fn-test-tf-sync-uat"
+    plan_type  = "FlexConsumption"
+    create     = false
+    runtime_name = "dotnet-isolated"
+    runtime_version = "8.0"
+    app_settings = [
+      { name = "SettingA", value = "ValueA", slotSetting = false },
+      { name = "SettingB", value = "ValueB", slotSetting = false }
+    ]
+  },
+  {
+    name       = "fn-test-tf-logs-uat"
+    plan_type  = "FlexConsumption"
+    create     = false
     runtime_name = "dotnet-isolated"
     runtime_version = "8.0"
     app_settings = [
@@ -92,34 +126,35 @@ functions_linux = [
 # -------------------------
 //storage_account_name = "statesttfdev"
 
-storage_account_name = [
+storage_accounts = [
   {
-    name                  = "stappwebdev01"
+    name                  = "statesttfuat"
     account_tier          = "Standard"
     replication_type      = "LRS"
     kind                  = "StorageV2"
     enable_static_website = true
     index_document        = "index.html"
     error_document        = "404.html"
-  },
-  {
-    name                  = "stblobdev01"
-    account_tier          = "Standard"
-    replication_type      = "LRS"
-    kind                  = "StorageV2"
-    enable_static_website = false
-    access_tier           = "Cool"
   }
+  # ,
+  # {
+  #   name                  = "stblobdev01"
+  #   account_tier          = "Standard"
+  #   replication_type      = "LRS"
+  #   kind                  = "StorageV2"
+  #   enable_static_website = false
+  #   access_tier           = "Cool"
+  # }
 ]
 
 # -------------------------
 # Service Bus
 # -------------------------
-service_bus_namespace_name = "sb-testtf-dev"
+service_bus_namespace_name = "sb-test-tf-uat"
 sku                        = "Standard"
-queues = [
+service_bus_queues = [
   {
-    name     = "orders-queue"
+    name     = "notifications"
     max_size_in_megabytes = 2048
     requires_duplicate_detection = true
     duplicate_detection_history_time_window = "PT30M"
@@ -130,99 +165,99 @@ queues = [
   }
 ]
 
-topics = [
-  {
-    name     = "events-topic"
-    subscriptions = [
-      {
-        name = "sub-analytics"
-      },
-      {
-        name = "sub-monitoring"
-        max_delivery_count = 20
-      }
-    ]
-  }
+service_bus_topics = [
+  # {
+  #   name     = "events-topic"
+  #   subscriptions = [
+  #     {
+  #       name = "sub-analytics"
+  #     },
+  #     {
+  #       name = "sub-monitoring"
+  #       max_delivery_count = 20
+  #     }
+  #   ]
+  # }
 ]
-# service_bus_queues = [
-#   {
-#     name = "queueue1"
-#     duplicate_detection_history_time_window = "PT10M"
-#     enable_dead_lettering_on_message_expiration = true
-#     #...
-#   },
-#   {
-#     name = "queueue2"
-#     duplicate_detection_history_time_window = "PT10M"
-#     enable_dead_lettering_on_message_expiration = true
-#     #...
-#   }
-# ]
-
-
 
 
 # -------------------------
 # Key Vault
 # -------------------------
-key_vault_name = "kv-testtf-dev"
+key_vault_name = "kv-tf-uat"
+create_secrets = false
 secrets = [
-  { name = "DB_ConnectionString", value = "SuperSecret123!" },
-  { name = "SB_ConnectionString",     value = "XYZ-ABC-987654" }
+  { name = "DB-ConnectionString", value = "SuperSecret123!" },
+  { name = "SB-ConnectionString",     value = "XYZ-ABC-987654" }
 ]
 
 
 # -------------------------
 # API Management
 # -------------------------
-api_management_name = "apim-testtf-dev"
-publisher_name      = "YourCompanyName"
-publisher_email     = "youremail@company.com"
+api_management_name = "apim-serverless-tf-uat"
+publisher_name      = "concentrix"
+publisher_email     = "luisa.rico1@concentrix.com"
 
 
 # -------------------------
 # SignalR
 # -------------------------
-signalr_name    = "test-tf-signalr"
+signalr_name    = "signalr-test-tf-uat"
 
 
 
 # -------------------------
 # Cosmos DB
 # -------------------------
-cosmosdb_name               = "testtf-cosmosdb-dev"
-# database_name               = "dev-database"
-# container_1_name            = "testtf-container1"
-# container_1_partition_key   = ["/rutaDeParticion1"]
-# container_1_throughput      = 400
-# container_2_name            = "testtf-container2"
-# container_2_partition_key   = ["/rutaDeParticion2"]
-# container_2_throughput      = 400
-databases = [
+cosmosdb_name  = "cdb-test-tf-uat"
+cosmos_databases = [
   {
-    name       = "productsdb"
+    name       = "test"
     throughput = 400
     containers = [
       {
-        name               = "items"
+        name               = "CategorySettings"
         partition_key_path = "/id"
-        throughput         = 400
+        //throughput        = 400 #opcional por si se requiere particular
       },
       {
-        name               = "logs"
-        partition_key_path = "/date"
-      }
-    ]
-  },
-  {
-    name       = "usersdb"
-    containers = [
+        name               = "ConfirmationLogs"
+        partition_key_path = "/id"
+      },
       {
-        name               = "profiles"
-        partition_key_path = "/userid"
+        name               = "Countries"
+        partition_key_path = "/id"
+
+      },
+      {
+        name               = "HostnameCountries"
+        partition_key_path = "/id"
+      },
+      {
+        name               = "NotificationLogs"
+        partition_key_path = "/id"
+      },
+      {
+        name               = "Notifications"
+        partition_key_path = "/id"
+      },
+      {
+        name               = "ServiceSettings"
+        partition_key_path = "/id"
       }
     ]
   }
+  # ,
+  # {
+  #   name       = "usersdb"
+  #   containers = [
+  #     {
+  #       name               = "profiles"
+  #       partition_key_path = "/userid"
+  #     }
+  #   ]
+  # }
 ]
 
 
@@ -248,11 +283,11 @@ subnets = {
 # -------------------------
 # Front Door (antes CDN)
 # -------------------------
-cdn_name             = "cdn-tfportal-dev"
-azurerm_cdn_endpoint = "test-tf-endpoint-dev"
-cdn_sku      = "Standard_AzureFrontDoor"
+cdn_name             = "cdn-frontdoor-tf-uat"
+azurerm_cdn_endpoint = "banner-test-tf"
+cdn_sku_name      = "Standard_AzureFrontDoor"
 //static_site_url = "storagename.z13.web.core.windows.net"
-origin_hostname = "storagename.z13.web.core.windows.net" # origen de tu static site
+origin_hostname = "statesttfdev.z13.web.core.windows.net" # origen de tu static site
 security_headers = {
   "Content-Security-Policy" = "default-src 'self'"
   "X-Frame-Options"         = "DENY"
@@ -260,76 +295,12 @@ security_headers = {
   "Referrer-Policy"         = "strict-origin-when-cross-origin"
 }
 
-cdn_endpoints = {
-  endpoint1 = {
-    name             = "tf-test-cdn-endpoint-dev"
-    origin_name      = "statesttfdev"
-    origin_host_name = "storagename.z13.web.core.windows.net" # DNS name backend
-    origin_http_port = 80
-    origin_https_port = 443
-  }
-  endpoint2 = {
-    name             = "tf-test-cdn-endpoint2-dev"
-    origin_name      = "statesttfdev"
-    origin_host_name = "storagename.z13.web.core.windows.net" # DNS name backend
-    origin_http_port = 80
-    origin_https_port = 443
-  }
-}
 
 
 # -------------------------
 # Tags globales
 # -------------------------
 tags = {
-  environment = "dev"
+  environment = "uat"
   project     = "terraform-azure"
 }
-
-
-
-# cdn_rules = [
-#   {
-#     name = "Global2"
-#     condition = {
-#       operator     = "Equals"
-#       match_values = ["HTTPS"]
-#     }
-#     actions = [
-#       {
-#         header_action = "Append"
-#         header_name   = "X-Content-Type-Options"
-#         value         = "nosniff"
-#       },
-#       {
-#         header_action = "Append"
-#         header_name   = "Strict-Transport-Security"
-#         value         = "max-age=31536000; includeSubDomains"
-#       },
-#       {
-#         header_action = "Append"
-#         header_name   = "Referrer-Policy"
-#         value         = "strict-origin"
-#       }
-#     ]
-#   },
-#   {
-#     name = "EnforceHTTPS"
-#     conditions = [
-#       {
-#         operator     = "Equals"
-#         match_values = ["HTTP"]
-#       }
-#     ]
-#     actions = [
-#       {
-#         redirect_type = "Found" # 302
-#         protocol      = "HTTPS"
-#         hostname      = "" # Mantener vacío para usar el original
-#         path          = "" # Mantener vacío para usar el original
-#         query_string  = "" # Mantener vacío para usar el original
-#         fragment      = "" # Mantener vacío para usar el original
-#       }
-#     ]
-#   }
-# ]

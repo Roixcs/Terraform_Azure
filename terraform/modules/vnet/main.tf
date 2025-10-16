@@ -5,6 +5,7 @@ resource "azurerm_virtual_network" "vnet" {
   resource_group_name  = var.resource_group_name
   address_space       = var.address_space
   tags = var.tags
+
 }
 
 resource "azurerm_subnet" "subnets" {
@@ -26,6 +27,7 @@ resource "azurerm_subnet" "subnets" {
       actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
     }
   }
+
 
   service_endpoints = each.value.service_endpoints
 }

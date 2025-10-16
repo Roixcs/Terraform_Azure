@@ -23,12 +23,13 @@ resource "azurerm_servicebus_namespace" "this" {
   location            = var.location
   resource_group_name = var.resource_group_name
   sku                 = var.sku
+
 }
 
 # Queues
 resource "azurerm_servicebus_queue" "this" {
   for_each = {
-    for q in var.queues : q.name => q
+    for q in var.service_bus_queues : q.name => q
     if var.create_service_bus
   }
 
@@ -45,7 +46,7 @@ resource "azurerm_servicebus_queue" "this" {
 # Topics
 resource "azurerm_servicebus_topic" "this" {
   for_each = {
-    for t in var.topics : t.name => t
+    for t in var.service_bus_topics : t.name => t
     if var.create_service_bus && var.sku != "Basic"
   }
 
@@ -60,7 +61,7 @@ resource "azurerm_servicebus_topic" "this" {
 # Subscriptions
 resource "azurerm_servicebus_subscription" "this" {
   for_each = {
-    for t in var.topics : t.name => t.subscriptions...
+    for t in var.service_bus_topics : t.name => t.subscriptions...
     if var.create_service_bus && var.sku != "Basic"
   }
 

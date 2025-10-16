@@ -185,7 +185,7 @@ variable "cdn_name" {
   description = "Nombre del Front Door Profile"
 }
 
-variable "cdn_sku" {
+variable "cdn_sku_name" {
   type        = string
   description = "SKU del Front Door (Standard_AzureFrontDoor o Premium_AzureFrontDoor)"
   default     = "Standard_AzureFrontDoor"
@@ -194,4 +194,28 @@ variable "cdn_sku" {
 variable "origin_hostname" {
   type        = string
   description = "Hostname del origen (ej: app service o storage account)."
+}
+
+
+variable "frontdoor_endpoints" {
+  description = "Lista de Endpoints a crear en Front Door"
+  type = list(object({
+    name        = string
+    origins     = list(object({
+      name       = string
+      host_name  = string
+      http_port  = optional(number, 80)
+      https_port = optional(number, 443)
+    }))
+    patterns_to_match = list(string)
+    rule_set_ids      = optional(list(string), [])
+  }))
+  default = []
+}
+
+
+variable "allow_destroy" {
+  description = "Permite destruir recursos. Debe estar en true solo para terraform destroy."
+  type        = bool
+  default     = false
 }

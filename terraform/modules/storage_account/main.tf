@@ -21,7 +21,7 @@
 
 resource "azurerm_storage_account" "this" {
   //count                    = var.create_storage_account ? 1 : 0
-  for_each = { for sa in var.storage_accounts : sa.name => sa }
+  for_each                 = var.create_storage_account ? { for sa in var.storage_accounts : sa.name => sa } : {}
 
   name                     = each.value.name
   resource_group_name      = var.resource_group_name

@@ -11,15 +11,24 @@ resource "azurerm_key_vault" "this" {
   enable_rbac_authorization   = true
   soft_delete_retention_days  = 7
   purge_protection_enabled    = true
+
 }
 
-resource "azurerm_key_vault_secret" "this" {
-  for_each = { for s in var.secrets : s.name => s }
+# resource "azurerm_key_vault_secret" "this" {
+#   for_each = { for s in var.secrets : s.name => s }
 
+#   name         = each.value.name
+#   value        = each.value.value
+#   key_vault_id = azurerm_key_vault.this[0].id
+# }
+
+resource "azurerm_key_vault_secret" "this" {
+  for_each = var.create_secrets ? { for s in var.secrets : s.name => s } : {}
   name         = each.value.name
   value        = each.value.value
   key_vault_id = azurerm_key_vault.this[0].id
 }
+
 
 
 # resource "azurerm_key_vault" "key_vault" {

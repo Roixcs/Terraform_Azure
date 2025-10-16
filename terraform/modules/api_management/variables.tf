@@ -1,4 +1,4 @@
-variable "create_api_management_name" {
+variable "create_api_management" {
   description = "Indica si se crea el APIM"
   type        = bool
   default     = false
@@ -27,4 +27,10 @@ variable "publisher_name" {
 variable "publisher_email" {
   description = "Correo del publicador de la API."
   type        = string
+}
+
+variable "allow_destroy" {
+  description = "Permite destruir recursos. Debe estar en true solo para terraform destroy."
+  type        = bool
+  default     = false
 }
